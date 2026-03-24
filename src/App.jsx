@@ -16,7 +16,7 @@ import { Toaster } from './components/ui/sonner'
 import ExpensesPage from './pages/expenses/ExpensesPage'
 import CategoriesPage from './pages/categories/CategoriesPage'
 import { clearCategories } from './features/categories/categorySlice'
-import { clearExpenses } from './features/expenses/expenseSlice'
+import { clearExpenses, fetchExpensesByUser } from './features/expenses/expenseSlice'
 
 const App = () => {
   const dispatch = useAppDispatch()
@@ -32,6 +32,7 @@ const App = () => {
             displayName: firebaseUser.displayName,
           })
         )
+        dispatch(fetchExpensesByUser(firebaseUser.uid))
       } else {
         dispatch(clearUser())
         dispatch(clearCategories())

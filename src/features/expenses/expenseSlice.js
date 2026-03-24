@@ -87,10 +87,21 @@ const expenseSlice = createSlice({
   reducers: {
     clearExpenses: (state) => {
       state.expenseList = []
+      state.isLoading = false
     },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchExpensesByUser.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(fetchExpensesByUser.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.expenseList = action.payload
+      })
+      .addCase(fetchExpensesByUser.rejected, (state) => {
+        state.isLoading = false
+      })
       .addCase(addExpense.fulfilled, (state, action) => {
         state.expenseList.push(action.payload)
       })
@@ -98,9 +109,6 @@ const expenseSlice = createSlice({
         state.expenseList = state.expenseList.filter(
           (expense) => expense.expenseId !== action.payload
         )
-      })
-      .addCase(fetchExpensesByUser.fulfilled, (state, action) => {
-        state.expenseList = action.payload
       })
       .addCase(updateExpense.fulfilled, (state, action) => {
         const { expenseId, name, category, amount, date } = action.payload

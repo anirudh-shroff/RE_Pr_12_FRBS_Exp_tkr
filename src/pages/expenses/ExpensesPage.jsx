@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Table,
   TableBody,
@@ -10,25 +10,15 @@ import {
 import { Button } from '@/components/ui/button'
 import { ArrowDown, ArrowDownUp, ArrowUp, Trash2 } from 'lucide-react'
 import AddExpenseDialog from '@/components/AddExpenseDialog'
-import { fetchCategoriesByUser } from '@/features/categories/categorySlice'
 import { useAppDispatch, useAppSelector } from '@/app/hooks'
-import { deleteExpense, fetchExpensesByUser } from '@/features/expenses/expenseSlice'
+import { deleteExpense } from '@/features/expenses/expenseSlice'
 
 const ExpensesPage = () => {
   const dispatch = useAppDispatch()
-  const { user } = useAppSelector((state) => state.auth)
-  const { expenseList } = useAppSelector((state) => state.expense)
+  const { expenseList, isLoading } = useAppSelector((state) => state.expense)
   const { categoryList } = useAppSelector((state) => state.category)
-
   const [sortKey, setSortKey] = useState('date')
   const [sortOrder, setSortOrder] = useState('desc')
-
-  useEffect(() => {
-    if (user?.uid) {
-      dispatch(fetchCategoriesByUser(user.uid))
-      dispatch(fetchExpensesByUser(user.uid))
-    }
-  }, [dispatch, user?.uid])
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -97,14 +87,21 @@ const ExpensesPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedExpenses.length === 0 && (
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className='text-center text-muted-foreground'>
+                  Loading expenses...
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && sortedExpenses.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className='text-center text-muted-foreground'>
                   No expenses found
                 </TableCell>
               </TableRow>
             )}
-            {sortedExpenses.map((expense) => (
+            {!isLoading && sortedExpenses.map((expense) => (
               <TableRow key={expense.expenseId}>
                 <TableCell className='font-medium'>{expense.name}</TableCell>
                 <TableCell className='text-muted-foreground'>
@@ -124,7 +121,7 @@ const ExpensesPage = () => {
                 </TableCell>
               </TableRow>
             ))}
-            {expenseList.length > 0 && (
+            {!isLoading && expenseList.length > 0 && (
               <TableRow>
                 <TableCell colSpan={2} className='font-semibold'>
                   Total
